@@ -14,11 +14,16 @@ namespace KableNet.Math
             rawNetId = networkIdentifier;
         }
 
-        private string rawNetId = "_NULL_";
+        private string rawNetId = "__NULL__";
 
         public string GetRaw( )
         {
             return rawNetId;
+        }
+
+        public static NetId Empty
+        {
+            get { return new NetId( "__NULL__" ); }
         }
 
         public static bool operator ==( NetId primary, NetId secondary )
