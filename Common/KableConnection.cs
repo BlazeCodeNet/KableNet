@@ -12,7 +12,7 @@ namespace KableNet.Common
     /// </summary>
     public class KableConnection
     {
-        private int maxProcessIterations = 5;
+        public int maxProcessIterations = 3;
 
         /// <summary>
         /// Only call this if you are ClientSided. ServerSided already
@@ -31,12 +31,12 @@ namespace KableNet.Common
             }
             catch ( SocketException ex )
             {
-                ConnectErroredEvent?.Invoke( ex );
+                ConnectErroredEvent?.Invoke( ex, this );
                 connected = false;
             }
             catch ( Exception ex )
             {
-                ConnectionErroredEvent?.Invoke( ex );
+                ConnectionErroredEvent?.Invoke( ex, this );
                 connected = false;
             }
         }
@@ -63,12 +63,12 @@ namespace KableNet.Common
                 }
                 catch ( SocketException ex )
                 {
-                    ConnectErroredEvent?.Invoke( ex );
+                    ConnectErroredEvent?.Invoke( ex, this );
                     connected = false;
                 }
                 catch ( Exception ex )
                 {
-                    ConnectionErroredEvent?.Invoke( ex );
+                    ConnectionErroredEvent?.Invoke( ex, this );
                     connected = false;
                 }
             }
@@ -85,16 +85,16 @@ namespace KableNet.Common
                 tcpConnection.EndConnect( AR );
                 connected = true;
                 BeginRecieve( );
-                ConnectedEvent?.Invoke( );
+                ConnectedEvent?.Invoke( this );
             }
             catch ( SocketException ex )
             {
-                ConnectErroredEvent?.Invoke( ex );
+                ConnectErroredEvent?.Invoke( ex, this );
                 connected = false;
             }
             catch ( Exception ex )
             {
-                ConnectionErroredEvent?.Invoke( ex );
+                ConnectionErroredEvent?.Invoke( ex, this );
                 connected = false;
             }
         }
@@ -136,12 +136,12 @@ namespace KableNet.Common
             }
             catch ( SocketException ex )
             {
-                ConnectErroredEvent?.Invoke( ex );
+                ConnectErroredEvent?.Invoke( ex, this );
                 connected = false;
             }
             catch ( Exception ex )
             {
-                ConnectionErroredEvent?.Invoke( ex );
+                ConnectionErroredEvent?.Invoke( ex, this );
                 connected = false;
             }
         }
@@ -180,19 +180,19 @@ namespace KableNet.Common
                     {
                         // We didnt read any data. Assume the connection was terminated and
                         // throw a error for it.
-                        ConnectionErroredEvent?.Invoke( new Exception( "[KableConnection_Error]Connection was lost: Read zero bytes!" ) );
+                        ConnectionErroredEvent?.Invoke( new Exception( "[KableConnection_Error]Connection was lost: Read zero bytes!" ), this );
                         connected = false;
                     }
                 }
             }
             catch ( SocketException ex )
             {
-                ConnectErroredEvent?.Invoke( ex );
+                ConnectErroredEvent?.Invoke( ex, this );
                 connected = false;
             }
             catch ( Exception ex )
             {
-                ConnectionErroredEvent?.Invoke( ex );
+                ConnectionErroredEvent?.Invoke( ex, this );
                 connected = false;
             }
 
@@ -269,14 +269,14 @@ namespace KableNet.Common
                             // its full! Raise the event and then if we have enough data, repeat this loop.
                             try
                             {
-                                PacketReadyEvent?.Invoke( new KablePacket( pendingPacket.currentPayload ) );
+                                PacketReadyEvent?.Invoke( new KablePacket( pendingPacket.currentPayload ), this );
                             }
                             catch ( Exception ex )
                             {
                                 // Crash from a subscriber to the event.
                                 // Not sure how to handle these, so for now just ignore it and continue?
                                 // Will try to figure out a better solution later, of course
-                                ConnectionErroredEvent?.Invoke( ex );
+                                ConnectionErroredEvent?.Invoke( ex, this );
                             }
 
                             lock ( packetBuffer )
@@ -342,16 +342,16 @@ namespace KableNet.Common
         private List<byte> packetBuffer = new List<byte>( );
         private PendingPacket? pendingPacket;
 
-        public delegate void KableConnectErrored( SocketException exception );
+        public delegate void KableConnectErrored( SocketException exception, KableConnection source );
         public event KableConnectErrored ConnectErroredEvent;
 
-        public delegate void KableConnectionErrored( Exception ex );
+        public delegate void KableConnectionErrored( Exception ex, KableConnection source );
         public event KableConnectionErrored ConnectionErroredEvent;
 
-        public delegate void KablePacketReady( KablePacket packet );
+        public delegate void KablePacketReady( KablePacket packet, KableConnection source );
         public event KablePacketReady PacketReadyEvent;
 
-        public delegate void KableConnected( );
+        public delegate void KableConnected( KableConnection source );
         public event KableConnected ConnectedEvent;
 
         /// <summary>
