@@ -6,7 +6,7 @@
  To start using KableNet, first import it as a reference in your project.
  The next steps depend on if you're doing the Server or Client(because they are handled seperately).
 
- **NOTICE:** Subscribe to events *BEFORE* starting the connection!**
+ **NOTICE:** Subscribe to events *BEFORE* starting the connection!
 
 #### ServerSide
 A KableNet server is rather simple to setup.
