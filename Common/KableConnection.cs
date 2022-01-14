@@ -20,14 +20,9 @@ namespace KableNet.Common
         /// </summary>
         public void Connect( )
         {
-            if ( connected || tcpConnection == null )
-            {
-                // Already Connected
-                return;
-            }
             try
             {
-                tcpConnection.BeginConnect( new IPEndPoint( IPAddress.Parse( address ), port ), ConnectCallback, null );
+                tcpConnection.BeginConnect( new IPEndPoint( address, port ), ConnectCallback, null );
             }
             catch ( SocketException ex )
             {
@@ -55,22 +50,19 @@ namespace KableNet.Common
         /// </summary>
         private void BeginRecieve( )
         {
-            if ( tcpConnection != null )
+            try
             {
-                try
-                {
-                    tcpConnection.BeginReceive( tcpBuffer, 0, tcpBuffer.Length, SocketFlags.None, new AsyncCallback( OnTCPRecvCallback ), null );
-                }
-                catch ( SocketException ex )
-                {
-                    ConnectErroredEvent?.Invoke( ex, this );
-                    connected = false;
-                }
-                catch ( Exception ex )
-                {
-                    ConnectionErroredEvent?.Invoke( ex, this );
-                    connected = false;
-                }
+                tcpConnection.BeginReceive( tcpBuffer, 0, tcpBuffer.Length, SocketFlags.None, new AsyncCallback( OnTCPRecvCallback ), null );
+            }
+            catch ( SocketException ex )
+            {
+                ConnectErroredEvent?.Invoke( ex, this );
+                connected = false;
+            }
+            catch ( Exception ex )
+            {
+                ConnectionErroredEvent?.Invoke( ex, this );
+                connected = false;
             }
         }
 
@@ -84,7 +76,6 @@ namespace KableNet.Common
             {
                 tcpConnection.EndConnect( AR );
                 connected = true;
-                BeginRecieve( );
                 ConnectedEvent?.Invoke( this );
             }
             catch ( SocketException ex )
@@ -96,6 +87,11 @@ namespace KableNet.Common
             {
                 ConnectionErroredEvent?.Invoke( ex, this );
                 connected = false;
+            }
+
+            if ( connected )
+            {
+                BeginRecieve( );
             }
         }
 
@@ -301,7 +297,7 @@ namespace KableNet.Common
         /// </summary>
         /// <param name="address">Address to connect to</param>
         /// <param name="port">Port to connect to</param>
-        public KableConnection( string address, int port )
+        public KableConnection( IPAddress address, int port )
         {
             this.address = address;
             this.port = port;
@@ -323,7 +319,7 @@ namespace KableNet.Common
 
             connected = true;
 
-            address = String.Empty;
+            address = null;
             connected = true;
             tcpBuffer = new byte[ SizeHelper.Buffer ];
 
@@ -333,7 +329,7 @@ namespace KableNet.Common
         public bool connected { get; private set; } = false;
         public Socket? tcpConnection { get; private set; }
         public Socket? udpConnection { get; private set; }
-        public string address { get; private set; }
+        public IPAddress address { get; private set; }
         public int port { get; private set; }
 
         public bool backgroundProcessing { get; private set; } = false;
