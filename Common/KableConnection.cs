@@ -154,8 +154,6 @@ namespace KableNet.Common
                 {
                     int bytesRead = tcpConnection.EndReceive( ar );
 
-                    Console.Write( $"READ { bytesRead } Bytes" );
-
                     // Make sure we account for differences in LittleEdian!
                     if ( !BitConverter.IsLittleEndian )
                     {

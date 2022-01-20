@@ -85,11 +85,19 @@ namespace KableNet.Common
         }
         public void Write( Identifier identifier )
         {
+            if ( identifier is null )
+            {
+                throw new Exception( "[KablePacket]Write(Identifier) was given NULL!" );
+            }
             Write( identifier.path );
             Write( identifier.value );
         }
         public void Write( Vec3f data )
         {
+            if ( data is null )
+            {
+                throw new Exception( "[KablePacket]Write(Vec3f) was given NULL!" );
+            }
             Write( data.x );
             Write( data.y );
             Write( data.z );
