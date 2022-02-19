@@ -127,7 +127,7 @@ namespace KableNet.Common
                         Array.Reverse( sendBufferArray );
                     }
 
-                    tcpConnection.Send( sendBufferArray );
+                    await Task.Run(() => tcpConnection.Send( sendBufferArray ));
                 }
             }
             catch ( SocketException ex )
